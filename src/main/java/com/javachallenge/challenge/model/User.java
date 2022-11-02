@@ -1,6 +1,7 @@
 package com.javachallenge.challenge.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,20 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-
-@Getter
-@Setter
-@NoArgsConstructor
-
+@Data
 @Entity
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private UUID id;
 	private String firstName;
 	private String lastName;
 	@Temporal(TemporalType.DATE)
@@ -33,6 +28,7 @@ public class User {
 	private String city;
 	private String coutnry;
 	private String mobile;
+	private String avatar;
 	@Column(nullable=false, unique=true)
 	private String username;
 	@Column(nullable=false, unique=true)
