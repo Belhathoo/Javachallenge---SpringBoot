@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -17,7 +18,8 @@ import lombok.Data;
 
 @Data
 @Entity
-public class User {
+@Table(name = "AppUser")
+public class AppUser {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
@@ -26,9 +28,11 @@ public class User {
 	@Temporal(TemporalType.DATE)
 	private Date birthDate;
 	private String city;
-	private String coutnry;
+	private String country;
 	private String mobile;
 	private String avatar;
+	private String jobPosition;
+	private String company;
 	@Column(nullable=false, unique=true)
 	private String username;
 	@Column(nullable=false, unique=true)

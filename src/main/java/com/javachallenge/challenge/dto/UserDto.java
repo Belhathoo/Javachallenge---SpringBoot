@@ -1,8 +1,10 @@
 package com.javachallenge.challenge.dto;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -15,7 +17,7 @@ public class UserDto {
 	private UUID id;
 	private String firstName;
 	private String lastName;
-	private LocalDate birthDate;
+	private Date birthDate;
 	private String city;
 	private String country;
 	private String avatar;
@@ -25,6 +27,7 @@ public class UserDto {
 	@NotNull
 	private String username;
 	@NotNull
+	@Email
 	private String email;
 	@Size(min=6, max=10)
 	private String password;

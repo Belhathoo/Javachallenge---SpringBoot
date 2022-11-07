@@ -2,11 +2,10 @@ package com.javachallenge.challenge.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
-import javax.annotation.Resource;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
@@ -21,16 +20,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.javachallenge.challenge.dto.BatchDto;
+import com.javachallenge.challenge.model.AppUser;
 import com.javachallenge.challenge.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
 public class UsersController {
 	private final UserService userService;
 
-	UsersController(UserService userService) {
-		this.userService = userService;
-	}
+@GetMapping("/allusers")
+ResponseEntity<List<AppUser>> getAllUsers() {
+	return ResponseEntity.ok(userService.getAllUsers());
+
+}
 
 	@GetMapping("/generate")
 	ResponseEntity<InputStreamResource> generateUsers(@RequestParam("count") Integer count) {

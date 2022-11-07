@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class BatchDto {
-	private String total;
-	private String imported;
-	private String nonImported;
+	private int total;
+	private int imported;
+	private int nonImported;
 
 }
