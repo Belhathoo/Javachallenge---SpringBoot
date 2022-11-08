@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.google.common.base.Strings;
+import com.javachallenge.challenge.exceptions.UnauthorizedAuthException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -74,7 +75,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (JwtException e) {
-            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
+            throw new UnauthorizedAuthException("Token cannot be trusted");
         }
 
         filterChain.doFilter(request, response);

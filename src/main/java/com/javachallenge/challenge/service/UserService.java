@@ -1,12 +1,12 @@
 package com.javachallenge.challenge.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -16,10 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.javachallenge.challenge.dto.BatchDto;
-import com.javachallenge.challenge.dto.UserDto;
-import com.javachallenge.challenge.exceptions.NotFoundException;
+import com.javachallenge.challenge.dto.AppUserDto;
+import com.javachallenge.challenge.exceptions.BadRequestException;
+import com.javachallenge.challenge.exceptions.UserNotFoundException;
 import com.javachallenge.challenge.model.AppUser;
 import com.javachallenge.challenge.model.UserRole;
 import com.javachallenge.challenge.repository.UserRepository;
@@ -27,7 +27,6 @@ import com.javachallenge.challenge.utils.ValidatorHelper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.App;
 import net.datafaker.Faker;
 import net.datafaker.Name;
 import net.datafaker.fileformats.Format;
@@ -39,15 +38,30 @@ public class UserService implements UserDetailsService {
 
 	private final UserRepository repo;
 	private final ObjectMapper objectMapper;
+	private final PasswordEncoder passwordEncoder;
 
-	public UserDetails loadUserByUsername(String username) throws NotFoundException {
+	private AppUserDto entityTDto(AppUser user) {
+		return objectMapper.convertValue(user, AppUserDto.class);
+	}
+
+	private AppUser dtoTAppUser(AppUserDto dto) {
+		return objectMapper.convertValue(dto, AppUser.class);
+	}
+
+	public AppUserDto getUserProfile(String username) {
+
+		return repo.findByUsername(username).map(this::entityTDto)
+				.orElseThrow(UserNotFoundException::new);
+	}
+
+	public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
 		Optional<AppUser> appUser = (new EmailValidator().isValid(username, null))
 				? repo.findByEmail(username)
 				: repo.findByUsername(username);
 
 		if (appUser.isEmpty()) {
 			log.error("User " + username + " not found");
-			throw new NotFoundException("User " + username + " not found");
+			throw new UserNotFoundException("User " + username + " not found");
 		}
 
 		Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -60,6 +74,10 @@ public class UserService implements UserDetailsService {
 	}
 
 	public String userGenerate(Integer count) {
+		if (count < 1) {
+			throw new BadRequestException("Parameter \"count\" should be positive");
+		}
+
 		Faker dataFaker = new Faker();
 		final String json = Format.toJson(
 				dataFaker.collection(dataFaker::name)
@@ -86,21 +104,21 @@ public class UserService implements UserDetailsService {
 		BatchDto resultDto = new BatchDto();
 
 		try {
-			List<UserDto> users = objectMapper
-					.readValue(file.getInputStream(), new TypeReference<List<UserDto>>() {
+			List<AppUserDto> users = objectMapper
+					.readValue(file.getInputStream(), new TypeReference<List<AppUserDto>>() {
 					});
 			resultDto.setTotal(users.size());
-			for (UserDto userDto : users) {
+			for (AppUserDto userDto : users) {
 				try {
 					ValidatorHelper.validate(userDto);
 					AppUser save = dtoTAppUser(userDto);
-					// save.setPassword(PasswordDecryptor);
+					save.setPassword(passwordEncoder.encode(userDto.getPassword()));
 					repo.save(save);
 					resultDto.setImported(resultDto.getImported() + 1);
-					log.info("User: " + userDto.getEmail() + " SAVED");
+					log.info("User: " + userDto.getUsername() + " SAVED");
 
 				} catch (Exception e) {
-					log.error("User: " + userDto.getEmail() + "  NOT SAVED! \n" + e.getMessage());
+					log.error("User: " + userDto.getUsername() + "  NOT SAVED! \n" + e.getMessage());
 					resultDto.setNonImported(resultDto.getNonImported() + 1);
 				}
 
@@ -111,20 +129,4 @@ public class UserService implements UserDetailsService {
 		return resultDto;
 	}
 
-	public UserDto getUserProfile(String username) {
-		return repo.findByUsername(username).map(this::entityTDto)
-				.orElseThrow(NotFoundException::new);
-	};
-
-	private UserDto entityTDto(AppUser user) {
-		return objectMapper.convertValue(user, UserDto.class);
-	}
-
-	private AppUser dtoTAppUser(UserDto dto) {
-		return objectMapper.convertValue(dto, AppUser.class);
-	}
-
-	public List<AppUser> getAllUsers() {
-		return repo.findAll();
-	}
 }

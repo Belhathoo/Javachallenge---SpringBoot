@@ -16,8 +16,12 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 
-	@ExceptionHandler(NotFoundException.class)
-	public ResponseEntity<Object> handleNotFoundException(BadRequestException e, WebRequest request) {
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException e, WebRequest request) {
 		return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+	@ExceptionHandler(UnauthorizedAuthException.class)
+	public ResponseEntity<Object> handleUnaUnauthorizedAuthException(UnauthorizedAuthException e, WebRequest request) {
+		return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
 	}
 }

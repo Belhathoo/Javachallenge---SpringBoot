@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.javachallenge.challenge.dto.AuthDto;
 import com.javachallenge.challenge.dto.TokenDto;
-import com.javachallenge.challenge.dto.UserDto;
+import com.javachallenge.challenge.dto.AppUserDto;
 import com.javachallenge.challenge.security.jwt.JwtGenerate;
 import com.javachallenge.challenge.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 
 @RestController
 @RequiredArgsConstructor
@@ -37,11 +40,14 @@ public class AuthController {
 					new UsernamePasswordAuthenticationToken(
 							authDto.getUsername(), authDto.getPassword()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			UserDto userProfile = userService.getUserProfile(authentication.getName());
+			AppUserDto userProfile = userService.getUserProfile(authentication.getName());
 			token = jwtGenerate.generateToken(authentication, userProfile.getEmail());
+			log.info(authDto.getUsername()+ " Successefuly Authenticated\nAccess token: "+token);
 
 		} catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity
+			.badRequest()
+			.build();
 		}
 		return ResponseEntity.ok(new TokenDto(token));
 	}
