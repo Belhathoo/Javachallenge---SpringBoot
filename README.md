@@ -1,4 +1,4 @@
-# JAVA Challenge Technique CiresTech
+# JAVA Challenge Technique
 
 ## Running the application locally
 
