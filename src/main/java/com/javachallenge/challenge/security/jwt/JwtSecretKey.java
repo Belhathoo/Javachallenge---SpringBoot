@@ -1,12 +1,11 @@
 package com.javachallenge.challenge.security.jwt;
 
-import javax.crypto.SecretKey;
-
+import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
+import javax.crypto.SecretKey;
 
 @RequiredArgsConstructor
 @Configuration

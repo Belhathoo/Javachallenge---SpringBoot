@@ -1,7 +1,7 @@
 package com.javachallenge.challenge.exceptions;
 
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class UnauthorizedAuthException extends RuntimeException{

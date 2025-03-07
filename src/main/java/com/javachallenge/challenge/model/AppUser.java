@@ -1,24 +1,16 @@
 package com.javachallenge.challenge.model;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Date;
 import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "AppUser")
+@RequiredArgsConstructor
 public class AppUser {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,4 +33,10 @@ public class AppUser {
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
+	public AppUser(String username, String pswd, String email, UserRole userRole) {
+		this.username = username;
+		this.password = pswd;
+		this.email = email;
+		this.role = userRole;
+	}
 }

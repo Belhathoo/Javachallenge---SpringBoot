@@ -1,15 +1,15 @@
 package com.javachallenge.challenge.security.jwt;
 
-import java.time.LocalDate;
-import java.util.Date;
-
-import javax.crypto.SecretKey;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Component
@@ -21,10 +21,12 @@ public class JwtGenerate {
 	public String generateToken(Authentication authentication, String email) {
 		return Jwts.builder()
 				.setSubject(authentication.getName())
-				.claim("authorities", authentication.getAuthorities())
+				.claim("role", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
 				.claim("email", email)
 				.setIssuedAt(new Date())
-				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(jwtConfig.getTokenExpirationAfterDays())))
+				.setExpiration(Date.from(LocalDateTime.now()
+						.plusHours(jwtConfig.getTokenExpirationHours()).atZone(ZoneId.systemDefault())
+						.toInstant()))
 				.signWith(secretKey)
 				.compact();
 	}

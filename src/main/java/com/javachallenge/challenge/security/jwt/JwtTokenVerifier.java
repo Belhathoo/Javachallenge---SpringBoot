@@ -1,17 +1,13 @@
 package com.javachallenge.challenge.security.jwt;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.crypto.SecretKey;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.base.Strings;
+import io.jsonwebtoken.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,18 +15,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.google.common.base.Strings;
-import com.javachallenge.challenge.exceptions.UnauthorizedAuthException;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
-@RequiredArgsConstructor
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private final SecretKey secretKey;
@@ -60,10 +55,17 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             String username = body.getSubject();
 
-            List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities");
+            Object authoritiesObj = body.get("role");
+            List<String> authorities;
+            authorities = (authoritiesObj instanceof List<?>) ?
+                    ((List<?>) authoritiesObj).stream()
+                            .filter(String.class::isInstance)
+                            .map(String.class::cast)
+                            .toList()
+                    : Collections.emptyList();
 
             Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
-                    .map(m -> new SimpleGrantedAuthority(m.get("authority")))
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toSet());
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -74,8 +76,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        } catch (ExpiredJwtException e) {
+            log.error("Token has expired: {}", e.getMessage());
         } catch (JwtException e) {
-            throw new UnauthorizedAuthException("Token cannot be trusted");
+            log.error("Invalid JWT token: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
