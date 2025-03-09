@@ -116,7 +116,8 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private String userGenerate(Integer count) {
+    @Override
+    public String userGenerate(Integer count) {
         Faker dataFaker = new Faker();
         return Format
                 .toJson(dataFaker.collection(dataFaker::name).len(count).build())

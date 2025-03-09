@@ -33,9 +33,9 @@ public class AppUser {
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
-	public AppUser(String username, String pswd, String email, UserRole userRole) {
+	public AppUser(String username, String password, String email, UserRole userRole) {
 		this.username = username;
-		this.password = pswd;
+		this.password = password;
 		this.email = email;
 		this.role = userRole;
 	}

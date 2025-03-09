@@ -31,4 +31,15 @@ public class JwtGenerate {
 				.compact();
 	}
 
+	public String generateExpiredToken(String username, String email) {
+		Date pastDate = new Date(System.currentTimeMillis() - 3600 * 1000); // 1 hour ago
+		return Jwts.builder()
+				.setSubject(username)
+				.claim("email", email)
+				.setIssuedAt(new Date())
+				.setExpiration(pastDate)
+				.signWith(secretKey)
+				.compact();
+	}
+
 }

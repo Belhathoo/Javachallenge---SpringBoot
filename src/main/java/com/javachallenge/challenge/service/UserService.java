@@ -15,5 +15,7 @@ public interface UserService extends UserDetailsService {
 
     InputStreamResource generateUserFile(Integer count);
 
+    String userGenerate(Integer count);
+
     BatchDto batchUsers(MultipartFile file);
 }
